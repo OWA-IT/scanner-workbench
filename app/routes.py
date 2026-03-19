@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 
 from .api_client import dump_payload, validate_scan
@@ -63,12 +65,23 @@ def index():
 
 @main_bp.route("/history")
 def history():
-    scans = (
-        Scan.query.order_by(Scan.requested_at.desc())
-        .limit(50)
-        .all()
+    page = request.args.get("page", default=1, type=int)
+    per_page = request.args.get("per_page", default=10, type=int)
+    allowed_page_sizes = {10, 15, 25, 50}
+    if per_page not in allowed_page_sizes:
+        per_page = 10
+
+    scans = Scan.query.order_by(Scan.requested_at.desc()).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False,
     )
-    return render_template("history.html", scans=scans)
+    return render_template(
+        "history.html",
+        scans=scans,
+        per_page=per_page,
+        page_size_options=sorted(allowed_page_sizes),
+    )
 
 
 @main_bp.route("/settings/location", methods=["POST"])
@@ -255,6 +268,7 @@ def _ensure_default_location() -> None:
 
 def inject_settings_context() -> dict:
     return {
+        "current_year": datetime.now().year,
         "settings_locations": _active_locations(),
         "settings_location": _get_selected_location(),
     }

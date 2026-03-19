@@ -6,10 +6,19 @@
 <section class="panel">
     <div class="panel-heading">
         <h2>Historical Scans</h2>
-        <span class="subtle-text">Most recent 50 scans</span>
+        <span class="subtle-text">Page {{ scans.page }} of {{ scans.pages or 1 }}</span>
     </div>
 
-    {% if scans %}
+    <form class="history-controls" method="get">
+        <label for="per_page">Rows per page</label>
+        <select id="per_page" name="per_page" onchange="this.form.submit()">
+            {% for option in page_size_options %}
+                <option value="{{ option }}" {% if option == per_page %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if scans.items %}
         <div class="table-wrap">
             <table>
                 <thead>
@@ -23,7 +32,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for scan in scans %}
+                    {% for scan in scans.items %}
                         <tr>
                             <td>{{ scan.requested_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                             <td>{{ scan.location.name }}</td>
@@ -36,6 +45,24 @@
                 </tbody>
             </table>
         </div>
+
+        <nav class="pagination-row" aria-label="Historical scan pages">
+            {% if scans.has_prev %}
+                <a class="secondary-button" href="{{ url_for('main.history', page=scans.prev_num, per_page=per_page) }}">Previous</a>
+            {% else %}
+                <span class="secondary-button secondary-button-disabled">Previous</span>
+            {% endif %}
+
+            <span class="pagination-status">
+                Showing {{ scans.items|length }} of {{ scans.total }} scans
+            </span>
+
+            {% if scans.has_next %}
+                <a class="secondary-button" href="{{ url_for('main.history', page=scans.next_num, per_page=per_page) }}">Next</a>
+            {% else %}
+                <span class="secondary-button secondary-button-disabled">Next</span>
+            {% endif %}
+        </nav>
     {% else %}
         <p class="empty-state">No scan history is available yet.</p>
     {% endif %}
