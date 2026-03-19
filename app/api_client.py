@@ -143,6 +143,12 @@ def _build_envelope(*, barcode: str, mode: str, location_id: str) -> str:
     inquiry_value = "1" if mode == "inquiry" else "0"
     escaped_barcode = escape(barcode)
     escaped_location_id = escape(location_id)
+    str_args = (
+        f"<inquiry>{inquiry_value}</inquiry>"
+        f"<scan>{escaped_barcode}</scan>"
+        f"<location>{escaped_location_id}</location>"
+    )
+    escaped_str_args = escape(str_args)
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -150,11 +156,7 @@ xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
     <rInvoke xmlns="http://tempuri.org/wwService/wwSales">
       <strFunc>validate</strFunc>
-      <strArgs>
-        <scan>{escaped_barcode}</scan>
-        <inquiry>{inquiry_value}</inquiry>
-        <location>{escaped_location_id}</location>
-      </strArgs>
+      <strArgs>{escaped_str_args}</strArgs>
     </rInvoke>
   </soap:Body>
 </soap:Envelope>"""
