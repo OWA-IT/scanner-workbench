@@ -25,7 +25,6 @@ flask --app run.py --debug run
 - `FLASK_SECRET_KEY`: Flask session secret
 - `DATABASE_URL`: SQLAlchemy database URI. Defaults to `sqlite:///scanner.db`
 - `SCANNER_API_URL`: Endpoint used for the validation call
-- `SCANNER_API_SOAP_ACTION`: Optional SOAPAction header if your service requires one
 - `SCANNER_API_TIMEOUT`: Request timeout in seconds. Defaults to `10`
 - `SCANNER_TESTING`: When `true`, disables live API calls and shows a Good/Bad test toggle in the UI
 

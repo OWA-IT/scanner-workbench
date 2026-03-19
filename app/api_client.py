@@ -11,7 +11,6 @@ from flask import current_app
 def validate_scan(*, location, barcode: str, mode: str, test_result: str = "good") -> dict:
     api_url = current_app.config.get("SCANNER_API_URL")
     api_timeout = current_app.config.get("SCANNER_API_TIMEOUT", 10)
-    soap_action = current_app.config.get("SCANNER_API_SOAP_ACTION")
     testing_mode = current_app.config.get("SCANNER_TESTING", False)
 
     if testing_mode:
@@ -33,9 +32,7 @@ def validate_scan(*, location, barcode: str, mode: str, test_result: str = "good
             "error_detail": "Missing SCANNER_API_URL environment variable.",
         }
 
-    headers = {"Content-Type": "text/xml; charset=utf-8"}
-    if soap_action:
-        headers["SOAPAction"] = soap_action
+    headers = {"Content-Type": 'text/xml;charset="utf-8"'}
 
     try:
         response = requests.post(

@@ -35,5 +35,4 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=365)
     SCANNER_API_URL = os.environ.get("SCANNER_API_URL")
     SCANNER_API_TIMEOUT = float(os.environ.get("SCANNER_API_TIMEOUT", "10"))
-    SCANNER_API_SOAP_ACTION = os.environ.get("SCANNER_API_SOAP_ACTION")
     SCANNER_TESTING = _as_bool(os.environ.get("SCANNER_TESTING"), default=False)
