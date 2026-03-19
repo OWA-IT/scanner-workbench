@@ -2,6 +2,8 @@
 
 Minimal Flask app for an internal ticket validation workflow.
 
+![alt text](image.png)
+
 ## Features
 
 - Current-location setting stored in a signed session cookie
@@ -10,29 +12,20 @@ Minimal Flask app for an internal ticket validation workflow.
 - SQLite-backed scan history
 - Admin location management with archive and restore support
 
-## Run locally
-
-```bash
-cp .env.example .env
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-flask --app run.py --debug run
-```
-
 ## Run with Docker
 
-Gunicorn runs inside the same app container. SQLite is stored on a Docker volume mounted at `/data`.
+Gunicorn runs inside the same app container. SQLite is stored on a Docker volume mounted at `./data`.
 
 1. Update `.env` for the target environment.
 2. For live testing, set `SCANNER_TESTING=false` and provide `SCANNER_API_URL`.
+3. Copy `docker-compose.yml`
 3. Build and start the container:
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
-The app will be available at `http://localhost:8000`.
+The app will be available at `http://localhost:8000`. Or whatever you changed the port to in the compose file.
 
 ## Environment variables
 
@@ -41,6 +34,16 @@ The app will be available at `http://localhost:8000`.
 - `SCANNER_API_URL`: Endpoint used for the validation call
 - `SCANNER_API_TIMEOUT`: Request timeout in seconds. Defaults to `10`
 - `SCANNER_TESTING`: When `true`, disables live API calls and shows a Good/Bad test toggle in the UI
+
+## Dev - Run locally
+
+```bash
+cp .env.example .env
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+flask --app run.py --debug run
+```
 
 ## Notes
 
