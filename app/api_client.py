@@ -59,7 +59,28 @@ def validate_scan(*, location, barcode: str, mode: str, test_result: str = "good
             "error_detail": str(exc),
         }
 
-    parsed = _parse_response(response.text)
+    raw_response = response.text or ""
+    response_headers = dict(response.headers)
+
+    if not response.ok:
+        return {
+            "ok": False,
+            "status": "api_error",
+            "http_status": response.status_code,
+            "summary": f"HTTP {response.status_code}",
+            "payload": {
+                "detail": None,
+                "location_id": location.external_location_id,
+                "msg": None,
+                "raw_response": raw_response,
+                "request_xml": request_xml,
+                "response_headers": response_headers,
+                "valid": None,
+            },
+            "error_detail": raw_response.strip() or f"HTTP {response.status_code} with empty response body.",
+        }
+
+    parsed = _parse_response(raw_response)
     msg = parsed["msg"] or ("GOOD" if parsed["valid"] == "1" else "BAD" if parsed["valid"] == "0" else "UNKNOWN")
     is_good = parsed["valid"] == "1"
     has_scan_result = parsed["valid"] in {"0", "1"} or parsed["msg"] in {"GOOD", "BAD"}
@@ -74,8 +95,9 @@ def validate_scan(*, location, barcode: str, mode: str, test_result: str = "good
             "detail": parsed["detail"],
             "location_id": location.external_location_id,
             "msg": msg,
-            "raw_response": response.text,
+            "raw_response": raw_response,
             "request_xml": request_xml,
+            "response_headers": response_headers,
             "valid": parsed["valid"],
         },
         "error_detail": parsed["detail"] if not is_good else None,
