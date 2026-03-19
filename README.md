@@ -4,6 +4,8 @@ Minimal Flask app for an internal ticket validation workflow.
 
 ![alt text](image.png)
 
+![alt text](image-1.png)
+
 ## Features
 
 - Current-location setting stored in a signed session cookie
