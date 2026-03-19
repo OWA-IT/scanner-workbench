@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import json
 import re
 from xml.sax.saxutils import escape
@@ -163,10 +164,11 @@ xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
 
 
 def _parse_response(raw_text: str) -> dict:
+    normalized = _normalize_response_body(raw_text)
     return {
-        "detail": _extract_tag(raw_text, "detail"),
-        "msg": _extract_tag(raw_text, "msg"),
-        "valid": _extract_tag(raw_text, "valid"),
+        "detail": _extract_tag(normalized, "detail"),
+        "msg": _extract_tag(normalized, "msg"),
+        "valid": _extract_tag(normalized, "valid"),
     }
 
 
@@ -180,6 +182,14 @@ def _extract_tag(raw_text: str, tag_name: str) -> str | None:
         return None
 
     return match.group(1).strip()
+
+
+def _normalize_response_body(raw_text: str) -> str:
+    invoke_result = _extract_tag(raw_text, "rInvokeResult")
+    if not invoke_result:
+        return html.unescape(raw_text)
+
+    return html.unescape(invoke_result)
 
 
 def _mock_response(*, detail: str, msg: str, valid: str) -> str:
