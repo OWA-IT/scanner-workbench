@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Locations{% endblock %}
+
+{% block content %}
+<section class="layout-grid">
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Locations</h2>
+            <span class="subtle-text">Authentication is not wired yet for admin routes.</span>
+        </div>
+
+        {% if locations %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>External ID</th>
+                            <th>Status</th>
+                            <th>Default</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for location in locations %}
+                            <tr>
+                                <td>{{ location.name }}</td>
+                                <td>{{ location.external_location_id }}</td>
+                                <td>{{ 'Active' if location.active else 'Archived' }}</td>
+                                <td>{{ 'Yes' if location.is_default else 'No' }}</td>
+                                <td class="actions-row">
+                                    <a class="ghost-link" href="{{ url_for('admin.edit_location', location_id=location.id) }}">Edit</a>
+                                    <form method="post" action="{{ url_for('admin.archive_location', location_id=location.id) }}">
+                                        <button class="secondary-button" type="submit">
+                                            {{ 'Archive' if location.active else 'Restore' }}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty-state">No locations configured yet.</p>
+        {% endif %}
+    </section>
+
+    <form class="panel panel-form" method="post">
+        <div class="panel-heading">
+            <h2>Add Location</h2>
+        </div>
+
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Warehouse A">
+
+        <label for="external_location_id">External Location ID</label>
+        <input id="external_location_id" name="external_location_id" type="text" placeholder="WHSE-001">
+
+        <label class="check-row">
+            <input name="active" type="checkbox" checked>
+            <span>Active</span>
+        </label>
+
+        <label class="check-row">
+            <input name="is_default" type="checkbox">
+            <span>Default location</span>
+        </label>
+
+        <button class="primary-button" type="submit">Create Location</button>
+    </form>
+</section>
+{% endblock %}

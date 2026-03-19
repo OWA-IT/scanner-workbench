@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Validate Scan{% endblock %}
+
+{% block content %}
+<section class="validate-grid">
+    <form class="panel panel-form" method="post">
+        <div class="panel-heading">
+            <h2>Scan Request</h2>
+            {% if testing_mode %}
+                <span class="pill">Test Mode</span>
+            {% endif %}
+        </div>
+
+        {% if testing_mode %}
+            <p class="status-note">
+                Test mode is enabled. Live API calls are disabled.
+            </p>
+        {% endif %}
+
+        <p class="current-location-line">
+            <span class="setting-label">Current Location:</span>
+            {% if current_location %}
+                <strong>{{ current_location.name }}</strong>
+            {% else %}
+                <strong>No active location selected.</strong>
+                <span class="setting-meta">Open Settings in the header to choose one.</span>
+            {% endif %}
+        </p>
+
+        <label for="barcode">Barcode</label>
+        <input
+            id="barcode"
+            name="barcode"
+            type="text"
+            value="{{ barcode }}"
+            placeholder="Scan or enter barcode"
+            autocomplete="off"
+            spellcheck="false"
+            autofocus
+        >
+
+        <div class="toggle-stack">
+            <div>
+                <label for="mode_inquiry">Mode</label>
+                <div class="switch-field">
+                    <span>Execute</span>
+                    <label class="switch">
+                        <input
+                            id="mode_inquiry"
+                            name="mode_inquiry"
+                            type="checkbox"
+                            {% if selected_mode == 'inquiry' %}checked{% endif %}
+                        >
+                        <span class="switch-slider"></span>
+                    </label>
+                    <span>Inquiry</span>
+                </div>
+            </div>
+
+            {% if testing_mode %}
+                <fieldset class="toggle-group">
+                    <legend>Test Result</legend>
+                    <p class="toggle-help">Choose the simulated response used by Validate.</p>
+                    <div class="segment-control">
+                        <label class="segment-option">
+                            <input type="radio" name="test_result" value="good" {% if selected_test_result == 'good' %}checked{% endif %}>
+                            <span>Good</span>
+                        </label>
+                        <label class="segment-option">
+                            <input type="radio" name="test_result" value="bad" {% if selected_test_result == 'bad' %}checked{% endif %}>
+                            <span>Bad</span>
+                        </label>
+                    </div>
+                </fieldset>
+            {% endif %}
+        </div>
+
+        <button class="primary-button" type="submit" {% if not current_location %}disabled{% endif %}>Validate</button>
+    </form>
+
+    <section class="panel last-scan-card last-scan-{{ last_scan.result_state if last_scan else 'neutral' }}">
+        <div class="panel-heading">
+            <h2>Last Scan</h2>
+            {% if last_scan %}
+                <span class="pill">{{ last_scan.result_label }}</span>
+            {% endif %}
+        </div>
+
+        {% if last_scan %}
+            <dl class="detail-grid detail-grid-compact">
+                <div>
+                    <dt>When</dt>
+                    <dd>{{ last_scan.requested_at.strftime('%Y-%m-%d %H:%M:%S') }}</dd>
+                </div>
+                <div>
+                    <dt>Location</dt>
+                    <dd>{{ last_scan.location.name }}</dd>
+                </div>
+                <div>
+                    <dt>Barcode</dt>
+                    <dd>{{ last_scan.barcode }}</dd>
+                </div>
+                <div>
+                    <dt>Mode</dt>
+                    <dd>{{ last_scan.mode }}</dd>
+                </div>
+                <div>
+                    <dt>Result</dt>
+                    <dd class="result-value">{{ last_scan.result_label }}</dd>
+                </div>
+            </dl>
+        {% else %}
+            <p class="empty-state">No scans have been submitted yet.</p>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Scanner Validation{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Scanner Workbench</p>
+                <h1>Ticket Validation</h1>
+            </div>
+            <nav class="nav-links">
+                <a href="{{ url_for('main.index') }}">Validate</a>
+                <a href="{{ url_for('main.history') }}">Historical Scans</a>
+                <details class="settings-menu">
+                    <summary class="settings-trigger" aria-label="Settings">&#9881;</summary>
+                    <div class="settings-popover">
+                        <form method="post" action="{{ url_for('main.set_location') }}">
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <p class="settings-title">Current Location</p>
+                            <label for="header_location_id">Location</label>
+                            <select id="header_location_id" name="location_id">
+                                {% for location in settings_locations %}
+                                    <option value="{{ location.id }}" {% if settings_location and location.id == settings_location.id %}selected{% endif %}>
+                                        {{ location.name }} ({{ location.external_location_id }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if settings_location %}
+                                <p class="settings-current">Current: {{ settings_location.name }}</p>
+                            {% else %}
+                                <p class="settings-current">No active location configured.</p>
+                            {% endif %}
+                            <button class="primary-button settings-button" type="submit" {% if not settings_locations %}disabled{% endif %}>Save</button>
+                        </form>
+                        <div class="settings-section">
+                            <p class="settings-title">Admin Settings</p>
+                            <div class="settings-tree">
+                                <a class="settings-tree-link" href="{{ url_for('admin.locations') }}">Location Setup</a>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </nav>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

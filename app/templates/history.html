@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Historical Scans{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Historical Scans</h2>
+        <span class="subtle-text">Most recent 50 scans</span>
+    </div>
+
+    {% if scans %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Requested</th>
+                        <th>Location</th>
+                        <th>Barcode</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scans %}
+                        <tr>
+                            <td>{{ scan.requested_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ scan.location.name }}</td>
+                            <td>{{ scan.barcode }}</td>
+                            <td>{{ scan.mode }}</td>
+                            <td>{{ scan.response_status }}</td>
+                            <td>{{ scan.result_label }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty-state">No scan history is available yet.</p>
+    {% endif %}
+</section>
+{% endblock %}
