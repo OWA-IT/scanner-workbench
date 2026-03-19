@@ -1,0 +1,16 @@
+services:
+  ticket-validation:
+    build: .
+    image: owa-ticket-validation:local
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite:////data/scanner.db
+    volumes:
+      - ticket_validation_data:/data
+    restart: unless-stopped
+
+volumes:
+  ticket_validation_data:
