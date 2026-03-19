@@ -10,13 +10,20 @@
             <span class="subtle-text">Authentication is not wired yet for admin routes.</span>
         </div>
 
+        <form class="filter-row" method="get">
+            <label class="check-row">
+                <input name="show_archived" type="checkbox" value="1" {% if show_archived %}checked{% endif %} onchange="this.form.submit()">
+                <span>Show archived locations</span>
+            </label>
+        </form>
+
         {% if locations %}
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>External ID</th>
+                            <th>Location #</th>
                             <th>Status</th>
                             <th>Default</th>
                             <th>Actions</th>
@@ -30,8 +37,15 @@
                                 <td>{{ 'Active' if location.active else 'Archived' }}</td>
                                 <td>{{ 'Yes' if location.is_default else 'No' }}</td>
                                 <td class="actions-row">
-                                    <a class="ghost-link" href="{{ url_for('admin.edit_location', location_id=location.id) }}">Edit</a>
+                                    <button
+                                        class="secondary-button"
+                                        type="button"
+                                        data-open-dialog="edit-location-{{ location.id }}"
+                                    >
+                                        Edit
+                                    </button>
                                     <form method="post" action="{{ url_for('admin.archive_location', location_id=location.id) }}">
+                                        <input type="hidden" name="show_archived" value="{{ '1' if show_archived else '0' }}">
                                         <button class="secondary-button" type="submit">
                                             {{ 'Archive' if location.active else 'Restore' }}
                                         </button>
@@ -42,21 +56,65 @@
                     </tbody>
                 </table>
             </div>
+
+            {% for location in locations %}
+                <dialog class="admin-dialog" id="edit-location-{{ location.id }}">
+                    <form class="panel panel-form admin-dialog-form" method="post" action="{{ url_for('admin.edit_location', location_id=location.id) }}">
+                        <div class="panel-heading">
+                            <h2>Edit Location</h2>
+                            <button class="dialog-close" type="button" data-close-dialog="edit-location-{{ location.id }}">Close</button>
+                        </div>
+
+                        <input type="hidden" name="show_archived" value="{{ '1' if show_archived else '0' }}">
+
+                        <label for="edit-name-{{ location.id }}">Name</label>
+                        <input id="edit-name-{{ location.id }}" name="name" type="text" value="{{ location.name }}">
+
+                        <label for="edit-external-location-id-{{ location.id }}">Location #</label>
+                        <input
+                            id="edit-external-location-id-{{ location.id }}"
+                            name="external_location_id"
+                            type="text"
+                            value="{{ location.external_location_id }}"
+                        >
+
+                        <label class="check-row">
+                            <input name="active" type="checkbox" {% if location.active %}checked{% endif %}>
+                            <span>Active</span>
+                        </label>
+
+                        <label class="check-row">
+                            <input name="is_default" type="checkbox" {% if location.is_default %}checked{% endif %}>
+                            <span>Default location (active locations only)</span>
+                        </label>
+
+                        <button class="primary-button" type="submit">Save Changes</button>
+                    </form>
+                </dialog>
+            {% endfor %}
         {% else %}
-            <p class="empty-state">No locations configured yet.</p>
+            <p class="empty-state">
+                {% if show_archived %}
+                    No locations configured yet.
+                {% else %}
+                    No active locations to display. Enable archived locations to view older entries.
+                {% endif %}
+            </p>
         {% endif %}
     </section>
 
-    <form class="panel panel-form" method="post">
+    <form class="panel panel-form admin-form" method="post">
         <div class="panel-heading">
             <h2>Add Location</h2>
         </div>
 
-        <label for="name">Name</label>
-        <input id="name" name="name" type="text" placeholder="Warehouse A">
+        <input type="hidden" name="show_archived" value="{{ '1' if show_archived else '0' }}">
 
-        <label for="external_location_id">External Location ID</label>
-        <input id="external_location_id" name="external_location_id" type="text" placeholder="WHSE-001">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Main Gate">
+
+        <label for="external_location_id">Location #</label>
+        <input id="external_location_id" name="external_location_id" type="text" placeholder="1">
 
         <label class="check-row">
             <input name="active" type="checkbox" checked>
@@ -71,4 +129,40 @@
         <button class="primary-button" type="submit">Create Location</button>
     </form>
 </section>
+
+<script>
+document.addEventListener("click", (event) => {
+    const openButton = event.target.closest("[data-open-dialog]");
+    if (openButton) {
+        const dialog = document.getElementById(openButton.dataset.openDialog);
+        if (dialog) {
+            dialog.showModal();
+        }
+        return;
+    }
+
+    const closeButton = event.target.closest("[data-close-dialog]");
+    if (closeButton) {
+        const dialog = document.getElementById(closeButton.dataset.closeDialog);
+        if (dialog) {
+            dialog.close();
+        }
+    }
+});
+
+document.querySelectorAll(".admin-dialog").forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+        const rect = dialog.getBoundingClientRect();
+        const insideDialog =
+            event.clientX >= rect.left &&
+            event.clientX <= rect.right &&
+            event.clientY >= rect.top &&
+            event.clientY <= rect.bottom;
+
+        if (!insideDialog) {
+            dialog.close();
+        }
+    });
+});
+</script>
 {% endblock %}

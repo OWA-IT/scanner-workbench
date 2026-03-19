@@ -110,6 +110,13 @@
                     <dd class="result-value">{{ last_scan.result_label }}</dd>
                 </div>
             </dl>
+
+            {% if last_scan.result_state == 'bad' and last_scan.error_detail %}
+                <div class="result-detail-block">
+                    <dt>Details</dt>
+                    <dd>{{ last_scan.error_detail }}</dd>
+                </div>
+            {% endif %}
         {% else %}
             <p class="empty-state">No scans have been submitted yet.</p>
         {% endif %}

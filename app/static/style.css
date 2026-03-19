@@ -193,6 +193,10 @@ a {
     gap: 0.8rem;
 }
 
+.admin-form {
+    align-self: start;
+}
+
 .validate-grid {
     display: grid;
     grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
@@ -203,6 +207,7 @@ a {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(320px, 420px);
     gap: 1rem;
+    align-items: start;
 }
 
 .toggle-stack {
@@ -494,6 +499,22 @@ textarea:focus {
     background: rgba(212, 75, 99, 0.16);
 }
 
+.result-detail-block {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.74);
+}
+
+.result-detail-block dt {
+    margin-bottom: 0.4rem;
+}
+
+.result-detail-block dd {
+    margin: 0;
+    white-space: pre-line;
+}
+
 .table-wrap {
     overflow-x: auto;
 }
@@ -525,6 +546,40 @@ th {
     font-size: 0.95rem;
     text-transform: none;
     letter-spacing: 0;
+}
+
+.filter-row {
+    margin: 0 0 1rem;
+}
+
+.admin-dialog {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: none;
+}
+
+.admin-dialog::backdrop {
+    background: rgba(23, 38, 60, 0.38);
+    backdrop-filter: blur(3px);
+}
+
+.admin-dialog-form {
+    width: min(540px, calc(100vw - 2rem));
+    margin: 0;
+}
+
+.dialog-close {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+}
+
+.dialog-close:hover {
+    color: var(--text);
 }
 
 .actions-row {

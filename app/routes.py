@@ -89,6 +89,8 @@ def set_location():
 
 @admin_bp.route("/locations", methods=["GET", "POST"])
 def locations():
+    show_archived = request.args.get("show_archived") == "1"
+
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         external_location_id = request.form.get("external_location_id", "").strip()
@@ -115,66 +117,74 @@ def locations():
             _ensure_default_location()
             db.session.commit()
             flash("Location created.", "success")
-            return redirect(url_for("admin.locations"))
+            return redirect(_locations_url(show_archived))
+
+    locations_query = Location.query
+    if not show_archived:
+        locations_query = locations_query.filter_by(active=True)
 
     return render_template(
         "admin/locations.html",
-        locations=Location.query.order_by(Location.active.desc(), Location.name.asc()).all(),
+        locations=locations_query.order_by(Location.active.desc(), Location.name.asc()).all(),
+        show_archived=show_archived,
     )
 
 
 @admin_bp.route("/locations/<int:location_id>/edit", methods=["GET", "POST"])
 def edit_location(location_id: int):
+    show_archived = _show_archived_requested()
     location = db.session.get(Location, location_id)
     if location is None:
         flash("Location not found.", "error")
-        return redirect(url_for("admin.locations"))
+        return redirect(_locations_url(show_archived))
 
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        external_location_id = request.form.get("external_location_id", "").strip()
-        active = request.form.get("active") == "on"
-        is_default = request.form.get("is_default") == "on" and active
+    if request.method == "GET":
+        return redirect(_locations_url(show_archived))
 
-        if not name or not external_location_id:
-            flash("Name and external location ID are required.", "error")
+    name = request.form.get("name", "").strip()
+    external_location_id = request.form.get("external_location_id", "").strip()
+    active = request.form.get("active") == "on"
+    is_default = request.form.get("is_default") == "on" and active
+
+    if not name or not external_location_id:
+        flash("Name and external location ID are required.", "error")
+    else:
+        duplicate_name = (
+            Location.query.filter(Location.name == name, Location.id != location.id).first()
+        )
+        duplicate_external_id = (
+            Location.query.filter(
+                Location.external_location_id == external_location_id,
+                Location.id != location.id,
+            ).first()
+        )
+
+        if duplicate_name:
+            flash("A location with that name already exists.", "error")
+        elif duplicate_external_id:
+            flash("That external location ID is already in use.", "error")
         else:
-            duplicate_name = (
-                Location.query.filter(Location.name == name, Location.id != location.id).first()
-            )
-            duplicate_external_id = (
-                Location.query.filter(
-                    Location.external_location_id == external_location_id,
-                    Location.id != location.id,
-                ).first()
-            )
+            if is_default:
+                _clear_default_location(exclude_id=location.id)
 
-            if duplicate_name:
-                flash("A location with that name already exists.", "error")
-            elif duplicate_external_id:
-                flash("That external location ID is already in use.", "error")
-            else:
-                if is_default:
-                    _clear_default_location(exclude_id=location.id)
+            location.name = name
+            location.external_location_id = external_location_id
+            location.active = active
+            location.is_default = is_default
+            _ensure_default_location()
+            db.session.commit()
+            flash("Location updated.", "success")
 
-                location.name = name
-                location.external_location_id = external_location_id
-                location.active = active
-                location.is_default = is_default
-                _ensure_default_location()
-                db.session.commit()
-                flash("Location updated.", "success")
-                return redirect(url_for("admin.locations"))
-
-    return render_template("admin/edit_location.html", location=location)
+    return redirect(_locations_url(show_archived))
 
 
 @admin_bp.route("/locations/<int:location_id>/archive", methods=["POST"])
 def archive_location(location_id: int):
+    show_archived = _show_archived_requested()
     location = db.session.get(Location, location_id)
     if location is None:
         flash("Location not found.", "error")
-        return redirect(url_for("admin.locations"))
+        return redirect(_locations_url(show_archived))
 
     if location.active:
         location.active = False
@@ -188,7 +198,7 @@ def archive_location(location_id: int):
         db.session.commit()
         flash("Location restored.", "success")
 
-    return redirect(url_for("admin.locations"))
+    return redirect(_locations_url(show_archived))
 
 
 def _active_locations() -> list[Location]:
@@ -248,3 +258,13 @@ def inject_settings_context() -> dict:
         "settings_locations": _active_locations(),
         "settings_location": _get_selected_location(),
     }
+
+
+def _show_archived_requested() -> bool:
+    return request.values.get("show_archived") == "1"
+
+
+def _locations_url(show_archived: bool) -> str:
+    if show_archived:
+        return url_for("admin.locations", show_archived=1)
+    return url_for("admin.locations")
