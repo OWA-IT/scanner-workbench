@@ -9,8 +9,5 @@ services:
     environment:
       DATABASE_URL: sqlite:////data/scanner.db
     volumes:
-      - ticket_validation_data:/data
+      - ./data:/data
     restart: unless-stopped
-
-volumes:
-  ticket_validation_data:
