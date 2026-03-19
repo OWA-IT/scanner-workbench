@@ -53,6 +53,7 @@ def index():
             last_scan = scan
             session["last_scan_id"] = scan.id
             session.permanent = True
+            barcode = ""
 
     return render_template(
         "index.html",
