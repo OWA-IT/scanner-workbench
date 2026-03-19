@@ -33,4 +33,4 @@ flask --app run.py --debug run
 - The app seeds one default location on first boot: `Main Warehouse / WHSE-001`.
 - The app uses SQLite by default and creates `scanner.db` automatically. `DATABASE_URL` is still supported if you want to override the database connection.
 - Database setup currently uses `db.create_all()` for simplicity. Move to migrations before shared deployment.
-- The SOAP request currently sends `inquiry` and `scan` based on the contract you provided. Location is still stored locally and available for future endpoint needs.
+- The SOAP request currently sends `scan`, `inquiry`, and `location`, where `location` is the current selected location number from the app settings.

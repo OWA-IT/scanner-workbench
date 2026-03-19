@@ -16,7 +16,11 @@ def validate_scan(*, location, barcode: str, mode: str, test_result: str = "good
     if testing_mode:
         return _mock_validation(location=location, barcode=barcode, mode=mode, test_result=test_result)
 
-    request_xml = _build_envelope(barcode=barcode, mode=mode)
+    request_xml = _build_envelope(
+        barcode=barcode,
+        mode=mode,
+        location_id=location.external_location_id,
+    )
 
     if not api_url:
         return {
@@ -113,9 +117,10 @@ def _mock_validation(*, location, barcode: str, mode: str, test_result: str) -> 
     }
 
 
-def _build_envelope(*, barcode: str, mode: str) -> str:
+def _build_envelope(*, barcode: str, mode: str, location_id: str) -> str:
     inquiry_value = "1" if mode == "inquiry" else "0"
     escaped_barcode = escape(barcode)
+    escaped_location_id = escape(location_id)
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -124,8 +129,9 @@ xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <rInvoke xmlns="http://tempuri.org/wwService/wwSales">
       <strFunc>validate</strFunc>
       <strArgs>
-        <inquiry>{inquiry_value}</inquiry>
         <scan>{escaped_barcode}</scan>
+        <inquiry>{inquiry_value}</inquiry>
+        <location>{escaped_location_id}</location>
       </strArgs>
     </rInvoke>
   </soap:Body>
