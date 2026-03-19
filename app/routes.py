@@ -18,7 +18,7 @@ def index():
     selected_mode = "execute"
     selected_test_result = "good"
     barcode = ""
-    last_scan = Scan.query.order_by(Scan.requested_at.desc()).first()
+    last_scan = _get_session_last_scan()
     testing_mode = current_app.config.get("SCANNER_TESTING", False)
 
     if request.method == "POST":
@@ -51,6 +51,8 @@ def index():
             db.session.add(scan)
             db.session.commit()
             last_scan = scan
+            session["last_scan_id"] = scan.id
+            session.permanent = True
 
     return render_template(
         "index.html",
@@ -216,6 +218,19 @@ def archive_location(location_id: int):
 
 def _active_locations() -> list[Location]:
     return Location.query.filter_by(active=True).order_by(Location.name.asc()).all()
+
+
+def _get_session_last_scan() -> Scan | None:
+    last_scan_id = session.get("last_scan_id")
+    if last_scan_id is None:
+        return None
+
+    scan = db.session.get(Scan, last_scan_id)
+    if scan is None:
+        session.pop("last_scan_id", None)
+        return None
+
+    return scan
 
 
 def _get_selected_location() -> Location | None:
