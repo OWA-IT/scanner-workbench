@@ -29,8 +29,8 @@ def _seed_locations() -> None:
 
     db.session.add(
         Location(
-            name="Main Warehouse",
-            external_location_id="WHSE-001",
+            name="Admissions",
+            external_location_id="1",
             active=True,
             is_default=True,
         )

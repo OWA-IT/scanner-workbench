@@ -18,10 +18,8 @@ Minimal Flask app for an internal ticket validation workflow.
 
 Gunicorn runs inside the same app container. SQLite is stored on a Docker volume mounted at `./data`.
 
-1. Update `.env` for the target environment.
-2. For live testing, set `SCANNER_TESTING=false` and provide `SCANNER_API_URL`.
-3. Set `SCANNER_IMAGE` to the image tag you want to deploy.
-4. Pull and start the container:
+1. Create `.env` (see `.env.example`) for the target environment.
+2. Pull and start the container:
 
 ```bash
 docker compose pull
@@ -54,7 +52,7 @@ flask --app run.py --debug run
 ## Notes
 
 - The main app is intentionally open. Admin routes are also open in this scaffold and should be protected once authentication is added.
-- The app seeds one default location on first boot: `Main Warehouse / WHSE-001`.
+- The app seeds one default location on first boot: `Admissions / 1`.
 - The app uses SQLite by default and creates `scanner.db` automatically. `DATABASE_URL` is still supported if you want to override the database connection.
 - Database setup currently uses `db.create_all()` for simplicity. Move to migrations before shared deployment.
 - The SOAP request currently sends `scan`, `inquiry`, and `location`, where `location` is the current selected location number from the app settings.
