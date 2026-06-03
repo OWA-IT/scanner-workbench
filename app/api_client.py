@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import time
 from xml.sax.saxutils import escape
 
 import requests
@@ -15,6 +16,10 @@ def validate_scan(*, location, barcode: str, mode: str, test_result: str = "good
     testing_mode = current_app.config.get("SCANNER_TESTING", False)
 
     if testing_mode:
+        test_delay = current_app.config.get("SCANNER_TEST_DELAY", 0)
+        if test_delay > 0:
+            time.sleep(test_delay)
+
         return _mock_validation(location=location, barcode=barcode, mode=mode, test_result=test_result)
 
     request_xml = _build_envelope(

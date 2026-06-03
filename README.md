@@ -38,6 +38,7 @@ The app will be available at `http://localhost:8000`. Or whatever you changed th
 - `SCANNER_API_URL`: Endpoint used for the validation call
 - `SCANNER_API_TIMEOUT`: Request timeout in seconds. Defaults to `10`
 - `SCANNER_TESTING`: When `true`, disables live API calls and shows a Good/Bad test toggle in the UI
+- `SCANNER_TEST_DELAY`: Optional artificial response delay in seconds when `SCANNER_TESTING=true`. Defaults to `0`
 
 ## Dev - Run locally
 

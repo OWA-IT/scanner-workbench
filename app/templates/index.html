@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="validate-grid">
-    <form class="panel panel-form" method="post">
+    <form class="panel panel-form validate-form" method="post">
         <div class="panel-heading">
             <h2>Scan Request</h2>
             {% if testing_mode %}
@@ -37,6 +37,7 @@
             placeholder="Scan or enter barcode"
             autocomplete="off"
             spellcheck="false"
+            required
             autofocus
         >
 
@@ -76,7 +77,9 @@
             {% endif %}
         </div>
 
-        <button class="primary-button" type="submit" {% if not current_location %}disabled{% endif %}>Validate</button>
+        <button class="primary-button validate-submit" type="submit" {% if not current_location %}disabled{% endif %}>
+            Validate
+        </button>
     </form>
 
     <section class="panel last-scan-card last-scan-{{ last_scan.result_state if last_scan else 'neutral' }}">
@@ -122,4 +125,52 @@
         {% endif %}
     </section>
 </section>
+
+<div class="processing-overlay" role="status" aria-live="polite" hidden>
+    <div class="processing-card">
+        <span class="processing-spinner" aria-hidden="true"></span>
+        <span>Processing scan...</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const validateForm = document.querySelector(".validate-form");
+
+    if (validateForm) {
+        let scanIsProcessing = false;
+
+        validateForm.addEventListener("submit", (event) => {
+            if (scanIsProcessing) {
+                event.preventDefault();
+                return;
+            }
+
+            if (!validateForm.checkValidity()) {
+                return;
+            }
+
+            scanIsProcessing = true;
+            validateForm.classList.add("is-processing");
+            validateForm.setAttribute("aria-busy", "true");
+
+            const barcodeInput = validateForm.querySelector("#barcode");
+            if (barcodeInput) {
+                barcodeInput.readOnly = true;
+            }
+
+            const overlay = document.querySelector(".processing-overlay");
+            if (overlay) {
+                overlay.hidden = false;
+            }
+
+            const submitButton = validateForm.querySelector(".validate-submit");
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = "Processing...";
+            }
+        });
+    }
+</script>
 {% endblock %}

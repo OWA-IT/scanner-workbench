@@ -362,6 +362,58 @@ textarea:focus {
     cursor: not-allowed;
 }
 
+.processing-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(23, 38, 60, 0.18);
+    backdrop-filter: blur(3px);
+}
+
+.processing-overlay[hidden] {
+    display: none;
+}
+
+.processing-card {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: min(280px, calc(100vw - 2rem));
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(39, 100, 216, 0.18);
+    border-radius: 18px;
+    background: rgba(248, 251, 255, 0.96);
+    box-shadow: var(--shadow);
+    color: var(--primary-strong);
+    font-weight: 700;
+    justify-content: center;
+}
+
+.processing-spinner {
+    flex: 0 0 auto;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 3px solid rgba(39, 100, 216, 0.22);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: processing-spin 0.8s linear infinite;
+}
+
+.validate-form.is-processing input,
+.validate-form.is-processing .switch,
+.validate-form.is-processing .segment-option {
+    pointer-events: none;
+}
+
+@keyframes processing-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .flash-stack {
     display: grid;
     gap: 0.75rem;
@@ -678,5 +730,11 @@ th {
     .history-controls,
     .pagination-row {
         display: grid;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .processing-spinner {
+        animation: none;
     }
 }
